@@ -23,6 +23,15 @@ public protocol DP3TBackgroundHandler: AnyObject {
     func didScheduleBackgrounTask()
 }
 
+public struct DP3TSyncCountry {
+    let countryCode: String
+    let active: Bool
+}
+
+public protocol DP3TActiveCountriesHandler: AnyObject {
+    var syncCountries: [DP3TSyncCountry] { get }
+}
+
 private var instance: DP3TSDK!
 
 /// DP3TTracing
@@ -49,7 +58,8 @@ public enum DP3TTracing {
 
     public static func initialize(with applicationDescriptor: ApplicationDescriptor,
                                   urlSession: URLSession = .shared,
-                                  backgroundHandler: DP3TBackgroundHandler? = nil) throws {
+                                  backgroundHandler: DP3TBackgroundHandler? = nil,
+                                  countriesHandler: DP3TSyncCountry) throws {
         guard instance == nil else {
             fatalError("DP3TSDK already initialized")
         }
@@ -131,6 +141,7 @@ public enum DP3TTracing {
     public static func iWasExposed(onset: Date,
                                    authentication: ExposeeAuthMethod,
                                    isFakeRequest: Bool = false,
+                                   countries: [DP3TSyncCountry],
                                    callback: @escaping (Result<Void, DP3TTracingError>) -> Void) {
         guard let instance = instance else {
             fatalError("DP3TSDK not initialized call `initialize(with:delegate:)`")
