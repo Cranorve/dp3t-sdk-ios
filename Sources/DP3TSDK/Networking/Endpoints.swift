@@ -78,9 +78,4 @@ struct ManagingExposeeEndpoint {
     func addExposedGaen() -> URL {
         baseURLVersionned.appendingPathComponent("gaen").appendingPathComponent("exposed")
     }
-
-    /// Get the add exposed next day endpoint URL
-    func addExposedGaenNextDay() -> URL {
-        baseURLVersionned.appendingPathComponent("gaen").appendingPathComponent("exposednextday")
-    }
 }
