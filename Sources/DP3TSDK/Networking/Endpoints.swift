@@ -20,7 +20,7 @@ struct ExposeeEndpoint {
     /// - Parameters:
     ///   - baseURL: The base URL of the endpoint
     ///   - version: The version of the API
-    init(baseURL: URL, version: String = "v1") {
+    init(baseURL: URL, version: String = "v2") {
         self.baseURL = baseURL
         self.version = version
     }
@@ -32,18 +32,21 @@ struct ExposeeEndpoint {
 
     /// Get the URL for the exposed people endpoint at a day for GAEN
     /// - Parameters:
-    ///  - batchTimestamp: batchTimestamp
-    ///  - publishedAfter: get results published after the given timestamp
-    func getExposeeGaen(batchTimestamp: Date, publishedAfter: Date? = nil) -> URL {
-        let milliseconds = batchTimestamp.millisecondsSince1970
+    ///  - since: Date of last sync
+    ///  - countries: all countries currently activated by the user
+    func getExposeeGaen(since: Date, countries: [DP3TSyncCountry]) -> URL {
         let url = baseURLVersionned.appendingPathComponent("gaen")
             .appendingPathComponent("exposed")
-            .appendingPathComponent(String(milliseconds))
 
         var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
 
-        if let publishedAfter = publishedAfter {
-            urlComponents?.queryItems = [URLQueryItem(name: "publishedAfter", value: String(publishedAfter.millisecondsSince1970))]
+        urlComponents?.queryItems = [
+            URLQueryItem(name: "since", value: String(since.millisecondsSince1970))
+        ]
+        for country in countries {
+            urlComponents?.queryItems?.append(
+                URLQueryItem(name: "country", value: "\(country.countryCode)\(country.active ? "1" : "0")")
+            )
         }
 
         guard let finalUrl = urlComponents?.url else {
@@ -64,7 +67,7 @@ struct ManagingExposeeEndpoint {
     /// - Parameters:
     ///   - baseURL: The base URL of the endpoint
     ///   - version: The version of the API
-    init(baseURL: URL, version: String = "v1") {
+    init(baseURL: URL, version: String = "v2") {
         self.baseURL = baseURL
         self.version = version
     }

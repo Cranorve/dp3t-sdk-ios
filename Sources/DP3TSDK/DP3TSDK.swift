@@ -67,7 +67,8 @@ class DP3TSDK {
     ///   - backgroundHandler: handler which gets called on background execution
     convenience init(applicationDescriptor: ApplicationDescriptor,
                      urlSession: URLSession,
-                     backgroundHandler: DP3TBackgroundHandler?) throws {
+                     backgroundHandler: DP3TBackgroundHandler?,
+                     countriesProvider: DP3TActiveCountriesHandler) throws {
         // reset keychain on first launch
         let defaults = Default.shared
         if defaults.isFirstLaunch {
@@ -84,7 +85,7 @@ class DP3TSDK {
         let matcher = ExposureNotificationMatcher(manager: manager, exposureDayStorage: exposureDayStorage)
         let diagnosisKeysProvider: DiagnosisKeysProvider = manager
 
-        let service = ExposeeServiceClient(descriptor: applicationDescriptor, urlSession: urlSession)
+        let service = ExposeeServiceClient(descriptor: applicationDescriptor, countriesProvider: countriesProvider, urlSession: urlSession)
 
         let synchronizer = KnownCasesSynchronizer(matcher: matcher, service: service, descriptor: applicationDescriptor)
 
@@ -170,6 +171,7 @@ class DP3TSDK {
     func sync(runningInBackground: Bool, callback: ((SyncResult) -> Void)?) {
         log.trace()
 
+        //TODO: this can be simplified, the dispatchgroup is not needed anymore
         let group = DispatchGroup()
 
         let sync = {
@@ -283,7 +285,7 @@ class DP3TSDK {
                 self.service.addExposeeList(model, authentication: authentication) { [weak self] result in
                     DispatchQueue.main.async {
                         switch result {
-                        case let .success(outstandingPublish):
+                        case .success:
                             if !isFakeRequest {
                                 self?.state.infectionStatus = .infected
                                 //self?.tracer.setEnabled(false, completionHandler: nil)

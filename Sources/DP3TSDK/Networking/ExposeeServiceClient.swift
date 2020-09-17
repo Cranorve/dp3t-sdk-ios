@@ -25,9 +25,9 @@ protocol ExposeeServiceClientProtocol: class {
 
     /// Get all exposee for a known day synchronously
     /// - Parameters:
-    ///   - batchTimestamp: The batch timestamp
+    ///   - since: The timestamp of the last synchronisation
     /// - returns: array of objects or nil if they were already cached
-    func getExposee(batchTimestamp: Date, completion: @escaping (Result<ExposeeSuccess, DP3TNetworkingError>) -> Void) -> URLSessionDataTask
+    func getExposee(since: Date, completion: @escaping (Result<ExposeeSuccess, DP3TNetworkingError>) -> Void) -> URLSessionDataTask
 
     /// Adds an exposee
     /// - Parameters:
@@ -50,6 +50,8 @@ class ExposeeServiceClient: ExposeeServiceClientProtocol {
 
     private let urlCache: URLCache
 
+    weak private var countriesProvider: DP3TActiveCountriesHandler?
+
     private let jwtVerifier: DP3TJWTVerifier?
 
     private let log = Logger(ExposeeServiceClient.self, category: "exposeeServiceClient")
@@ -66,10 +68,11 @@ class ExposeeServiceClient: ExposeeServiceClientProtocol {
 
     /// Initialize the client with a  descriptor
     /// - Parameter descriptor: The descriptor to use
-    public init(descriptor: ApplicationDescriptor, urlSession: URLSession = .shared, urlCache: URLCache = .shared) {
+    public init(descriptor: ApplicationDescriptor, countriesProvider: DP3TActiveCountriesHandler, urlSession: URLSession = .shared, urlCache: URLCache = .shared) {
         self.descriptor = descriptor
         self.urlSession = urlSession
         self.urlCache = urlCache
+        self.countriesProvider = countriesProvider
         exposeeEndpoint = ExposeeEndpoint(baseURL: descriptor.bucketBaseUrl)
         managingExposeeEndpoint = ManagingExposeeEndpoint(baseURL: descriptor.reportBaseUrl)
         if #available(iOS 11.0, *), let jwtPublicKey = descriptor.jwtPublicKey {
@@ -97,12 +100,16 @@ class ExposeeServiceClient: ExposeeServiceClientProtocol {
 
     /// Get all exposee for a known day
     /// - Parameters:
-    ///   - batchTimestamp: The batch timestamp
+    ///   - since: The timestamp of the last synchronisation
     ///   - completion: The completion block
     /// - returns: array of objects or nil if they were already cached
-    func getExposee(batchTimestamp: Date, completion: @escaping (Result<ExposeeSuccess, DP3TNetworkingError>) -> Void) -> URLSessionDataTask {
-        log.log("getExposeeSynchronously for timestamp %{public}@ -> %lld", batchTimestamp.description, batchTimestamp.millisecondsSince1970)
-        let url: URL = exposeeEndpoint.getExposeeGaen(batchTimestamp: batchTimestamp)
+    func getExposee(since: Date, completion: @escaping (Result<ExposeeSuccess, DP3TNetworkingError>) -> Void) -> URLSessionDataTask {
+        guard let countriesProvider = countriesProvider else {
+            fatalError("can't sync without countriesProvider")
+        }
+
+        log.log("getExposee since %{public}@ -> %lld", since.description, since.millisecondsSince1970)
+        let url: URL = exposeeEndpoint.getExposeeGaen(since: since, countries: countriesProvider.syncCountries)
 
         var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 60.0)
         request.setValue("application/zip", forHTTPHeaderField: "Accept")
@@ -244,28 +251,5 @@ private struct ExposeeClaims: DP3TClaims {
         case contentHash = "content-hash"
         case hashAlg = "hash-alg"
         case iss, iat, exp
-    }
-}
-
-private extension URLSession {
-    func synchronousDataTask(with request: URLRequest) -> (Data?, URLResponse?, Error?) {
-        var data: Data?
-        var response: URLResponse?
-        var error: Error?
-
-        let semaphore = DispatchSemaphore(value: 0)
-
-        let dataTask = self.dataTask(with: request) {
-            data = $0
-            response = $1
-            error = $2
-
-            semaphore.signal()
-        }
-        dataTask.resume()
-
-        _ = semaphore.wait(timeout: .distantFuture)
-
-        return (data, response, error)
     }
 }

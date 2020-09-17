@@ -178,7 +178,7 @@ class KnownCasesSynchronizer {
             totalNumberOfRequests += 1
             dispatchGroup.enter()
             tasksRunning += 1
-            let task = service.getExposee(batchTimestamp: currentKeyDate) { [weak self] result in
+            let task = service.getExposee(since: currentKeyDate) { [weak self] result in
                 guard let self = self else { return }
                 self.queue.sync {
                     guard self.isCancelled == false else {

@@ -59,13 +59,14 @@ public enum DP3TTracing {
     public static func initialize(with applicationDescriptor: ApplicationDescriptor,
                                   urlSession: URLSession = .shared,
                                   backgroundHandler: DP3TBackgroundHandler? = nil,
-                                  countriesHandler: DP3TSyncCountry) throws {
+                                  countriesProvider: DP3TActiveCountriesHandler) throws {
         guard instance == nil else {
             fatalError("DP3TSDK already initialized")
         }
         instance = try DP3TSDK(applicationDescriptor: applicationDescriptor,
                                urlSession: urlSession,
-                               backgroundHandler: backgroundHandler)
+                               backgroundHandler: backgroundHandler,
+                               countriesProvider: countriesProvider)
     }
 
     /// The delegate
