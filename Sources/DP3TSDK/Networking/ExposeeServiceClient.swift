@@ -27,7 +27,7 @@ protocol ExposeeServiceClientProtocol: class {
     /// - Parameters:
     ///  - since: last published key tag if one is stored
     /// - returns: array of objects or nil if they were already cached
-    func getExposee(lastKeyBundleTag: String?, completion: @escaping (Result<ExposeeSuccess, DP3TNetworkingError>) -> Void) -> URLSessionDataTask
+    func getExposee(lastKeyBundleTag: String?, includeAllInternationalKeys: Bool, completion: @escaping (Result<ExposeeSuccess, DP3TNetworkingError>) -> Void) -> URLSessionDataTask
 
     /// Adds an exposee
     /// - Parameters:
@@ -97,12 +97,13 @@ class ExposeeServiceClient: ExposeeServiceClientProtocol {
 
     /// Get all exposee for a known day
     /// - Parameters:
-    ///  - since: last published key tag if one is stored
+    ///  - lastKeyBundleTag: last published key tag if one is stored
+    ///  - includeAllInternationalKeys: if all international keys should be fetched from the backend
     ///   - completion: The completion block
     /// - returns: array of objects or nil if they were already cached
-    func getExposee(lastKeyBundleTag: String?, completion: @escaping (Result<ExposeeSuccess, DP3TNetworkingError>) -> Void) -> URLSessionDataTask {
+    func getExposee(lastKeyBundleTag: String?, includeAllInternationalKeys: Bool, completion: @escaping (Result<ExposeeSuccess, DP3TNetworkingError>) -> Void) -> URLSessionDataTask {
         log.log("getExposeeSynchronously for lastPublishedKeyTag %{public}@", lastKeyBundleTag ?? "nil")
-        let url: URL = exposeeEndpoint.getExposee(lastKeyBundleTag: lastKeyBundleTag)
+        let url: URL = exposeeEndpoint.getExposee(lastKeyBundleTag: lastKeyBundleTag, includeAllInternationalKeys: includeAllInternationalKeys)
 
         var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 60.0)
         request.setValue("application/zip", forHTTPHeaderField: "Accept")

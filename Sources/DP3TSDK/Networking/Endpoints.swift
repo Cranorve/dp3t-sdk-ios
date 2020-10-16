@@ -33,16 +33,18 @@ struct ExposeeEndpoint {
     /// Get the URL for the exposed people endpoint for a given lastKeyBundleTag
     /// - Parameters:
     ///  - lastKeyBundleTag: last published key tag if one is stored
-    func getExposee(lastKeyBundleTag: String?) -> URL {
+    func getExposee(lastKeyBundleTag: String?, includeAllInternationalKeys: Bool) -> URL {
         let url = baseURLVersionned.appendingPathComponent("gaen")
             .appendingPathComponent("exposed")
 
         var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        urlComponents?.queryItems = []
+
         if let lastKeyBundleTag = lastKeyBundleTag {
-            urlComponents?.queryItems = [
-                URLQueryItem(name: "lastKeyBundleTag", value: lastKeyBundleTag)
-            ]
+            urlComponents?.queryItems?.append(URLQueryItem(name: "lastKeyBundleTag", value: lastKeyBundleTag))
         }
+
+        urlComponents?.queryItems?.append(URLQueryItem(name: "includeAllInternationalKeys", value: includeAllInternationalKeys ? "true" : "false"))
 
         guard let finalUrl = urlComponents?.url else {
             fatalError("can't create URLComponents url")

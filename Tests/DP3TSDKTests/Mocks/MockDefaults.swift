@@ -12,6 +12,8 @@
 import Foundation
 
 class MockDefaults: DefaultStorage {
+    var includeAllInternationalKeys: Bool = false
+
     var lastKeyBundleTag: String?
 
     var exposureDetectionDates: [Date] = []
@@ -31,5 +33,6 @@ class MockDefaults: DefaultStorage {
         isFirstLaunch = false
         lastSync = nil
         didMarkAsInfected = false
+        includeAllInternationalKeys = false
     }
 }

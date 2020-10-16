@@ -33,7 +33,19 @@ class ExposeeServiceClientTests: XCTestCase {
     func testExposeeNolastKeyBundleTag(){
         let (request, result) = getExposeeRequest(lastKeyBundleTag: nil)
         XCTAssertEqual(request.url!.absoluteString,
-                       "https://bucket.dpppt.org/v2/gaen/exposed")
+                       "https://bucket.dpppt.org/v2/gaen/exposed?includeAllInternationalKeys=false")
+        switch result {
+        case .success:
+            XCTFail()
+        case let .failure(error):
+            XCTAssert(error == .notHTTPResponse)
+        }
+    }
+
+    func testExposeeNolastKeyBundleTagIncludeInternational(){
+        let (request, result) = getExposeeRequest(lastKeyBundleTag: nil, includeAllInternationalKeys: true)
+        XCTAssertEqual(request.url!.absoluteString,
+                       "https://bucket.dpppt.org/v2/gaen/exposed?includeAllInternationalKeys=true")
         switch result {
         case .success:
             XCTFail()
@@ -45,7 +57,7 @@ class ExposeeServiceClientTests: XCTestCase {
     func testExposeeWithlastKeyBundleTag(){
         let (request, result) = getExposeeRequest(lastKeyBundleTag: "1600560000000")
         XCTAssertEqual(request.url!.absoluteString,
-                       "https://bucket.dpppt.org/v2/gaen/exposed?lastKeyBundleTag=1600560000000")
+                       "https://bucket.dpppt.org/v2/gaen/exposed?lastKeyBundleTag=1600560000000&includeAllInternationalKeys=false")
         switch result {
         case .success:
             XCTFail()
@@ -122,10 +134,10 @@ class ExposeeServiceClientTests: XCTestCase {
 
 
     // MARK: Helper
-    func getExposeeRequest(lastKeyBundleTag: String?) -> (URLRequest, Result<ExposeeSuccess, DP3TNetworkingError>) {
+    func getExposeeRequest(lastKeyBundleTag: String?, includeAllInternationalKeys: Bool = false) -> (URLRequest, Result<ExposeeSuccess, DP3TNetworkingError>) {
         let exp = expectation(description: "exp")
         var result: Result<ExposeeSuccess, DP3TNetworkingError>?
-        let task  = client.getExposee(lastKeyBundleTag: lastKeyBundleTag) { (res) in
+        let task  = client.getExposee(lastKeyBundleTag: lastKeyBundleTag, includeAllInternationalKeys: includeAllInternationalKeys) { (res) in
             result = res
             exp.fulfill()
         }
