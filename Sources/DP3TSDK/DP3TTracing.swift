@@ -70,6 +70,11 @@ public enum DP3TTracing {
         }
     }
 
+    public static func setIncludeAllInternationalKeys(_ include: Bool) {
+        instancePrecondition()
+        instance.setIncludeAllInternationalKeys(include)
+    }
+
     /// Starts tracing
     public static func startTracing(completionHandler: ((TracingEnableResult) -> Void)? = nil) {
         instancePrecondition()

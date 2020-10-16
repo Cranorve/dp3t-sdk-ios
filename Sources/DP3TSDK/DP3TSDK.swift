@@ -151,13 +151,14 @@ class DP3TSDK {
                                                   object: nil)
     }
 
-    func setIncludeAllInternationalKeysEnabled(_ enabled: Bool) {
+
+    func setIncludeAllInternationalKeys(_ include: Bool) {
         // if internationalisation gets enabled and was previosly disabled we reset the lastKeyBundleTag
         // in order to retreive all data on the next sync
-        if enabled && !state.includeAllInternationalKeys {
+        if include && !state.includeAllInternationalKeys {
             defaults.lastKeyBundleTag = nil
         }
-        state.includeAllInternationalKeys = enabled
+        state.includeAllInternationalKeys = include
     }
 
     /// start tracing
