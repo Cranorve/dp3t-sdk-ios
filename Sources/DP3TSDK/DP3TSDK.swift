@@ -236,10 +236,12 @@ class DP3TSDK {
     /// This will stop tracing
     /// - Parameters:
     ///   - onset: Start date of the exposure
+    ///   - international: indicates whether the user wants to share its keys with the participating countries
     ///   - authString: Authentication string for the exposure change
     ///   - isFakeRequest: indicates if the request should be a fake one. This method should be called regulary so people sniffing the networking traffic can no figure out if somebody is marking themself actually as exposed
     ///   - callback: callback
     func iWasExposed(onset: Date,
+                     international: Bool,
                      authentication: ExposeeAuthMethod,
                      isFakeRequest: Bool = false,
                      callback: @escaping (Result<Void, DP3TTracingError>) -> Void) {
@@ -286,6 +288,7 @@ class DP3TSDK {
                 mutableKeys.append(contentsOf: self.diagnosisKeysProvider.getFakeKeys(count: fakeKeyCount, startingFrom: startingFrom))
 
                 let model = ExposeeListModel(gaenKeys: mutableKeys,
+                                             international: international,
                                              fake: isFakeRequest)
 
                 self.service.addExposeeList(model, authentication: authentication) { [weak self] result in

@@ -96,7 +96,7 @@ class DP3TSDKTests: XCTestCase {
 
         let exp = expectation(description: "infected")
         keyProvider.keys = [ .init(keyData: Data(count: 16), rollingPeriod: 144, rollingStartNumber: DayDate().period, transmissionRiskLevel: 0, fake: 0) ]
-        sdk.iWasExposed(onset: .init(timeIntervalSinceNow: -.day), authentication: .none) { (result) in
+        sdk.iWasExposed(onset: .init(timeIntervalSinceNow: -.day), international: true, authentication: .none) { (result) in
             exp.fulfill()
         }
         wait(for: [exp], timeout: 0.1)
@@ -117,6 +117,7 @@ class DP3TSDKTests: XCTestCase {
             XCTAssertEqual(timeDiff, .day)
             runningDate = date
         }
+        XCTAssert(model!.international)
 
         XCTAssertEqual(sdk.status.infectionStatus, .infected)
         XCTAssertEqual(sdk.status.trackingState, .stopped)

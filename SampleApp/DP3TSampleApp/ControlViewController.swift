@@ -221,7 +221,7 @@ class ControlViewController: UIViewController {
 
     @objc func setExposed() {
         // Share keys of last 14 days
-        DP3TTracing.iWasExposed(onset: Date(timeIntervalSinceNow: -60 * 60 * 24 * 14), authentication: .none) { [weak self] result in
+        DP3TTracing.iWasExposed(onset: Date(timeIntervalSinceNow: -60 * 60 * 24 * 14), international: true, authentication: .none) { [weak self] result in
             switch result {
             case let .failure(error):
                 let ac = UIAlertController(title: "Error",
@@ -238,7 +238,7 @@ class ControlViewController: UIViewController {
     }
 
     @objc func setExposedFake() {
-        DP3TTracing.iWasExposed(onset: Date(), authentication: .none, isFakeRequest: true) { _ in
+        DP3TTracing.iWasExposed(onset: Date(), international: true, authentication: .none, isFakeRequest: true) { _ in
             self.updateUI(DP3TTracing.status)
         }
     }

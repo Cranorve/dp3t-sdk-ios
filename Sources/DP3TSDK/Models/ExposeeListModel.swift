@@ -23,6 +23,8 @@ struct ExposeeListModel: Encodable {
     /// Diagnosis keys
     let gaenKeys: [CodableDiagnosisKey]
 
+    let international: Bool
+
     let fake: Bool
 
     func encode(to encoder: Encoder) throws {
@@ -31,9 +33,11 @@ struct ExposeeListModel: Encodable {
         try container.encode(gaenKeys, forKey: .gaenKeys)
 
         try container.encode(fake ? 1 : 0, forKey: .fake)
+
+        try container.encode(international ? 1 : 0, forKey: .international)
     }
 
     enum CodingKeys: CodingKey {
-        case gaenKeys, fake
+        case gaenKeys, fake, international
     }
 }
